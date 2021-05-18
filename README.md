@@ -27,8 +27,6 @@ bash <(curl -sSL "https://github.com/LovelyHaochi/StreamUnlockTest/raw/main/medi
 - 公主连结Re:Dive
 
 ## 鸣谢
-[LemonBench](https://github.com/LemonBench) / [LemonBench](https://github.com/LemonBench/LemonBench)
-
-[CoiaPrant](https://github.com/CoiaPrant) / [MediaUnlock_Test](https://github.com/CoiaPrant/MediaUnlock_Test)
-
-[NyanChanMeow](https://github.com/NyanChanMeow) / [StreamUnblockCheck](https://github.com/NyanChanMeow/StreamUnblockCheck)
+- [LemonBench](https://github.com/LemonBench/LemonBench)
+- [MediaUnlock_Test](https://github.com/CoiaPrant/MediaUnlock_Test)
+- [StreamUnblockCheck](https://github.com/NyanChanMeow/StreamUnblockCheck)
