@@ -1,5 +1,5 @@
 #!/bin/bash
-shell_version="1.0.4";
+shell_version="1.0.5";
 UA_Browser="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.87 Safari/537.36";
 UA_Dalvik="Dalvik/2.1.0 (Linux; U; Android 9; ALP-AL00 Build/HUAWEIALP-AL00)";
 Font_Black="\033[30m";
@@ -13,8 +13,11 @@ Font_White="\033[37m";
 Font_Suffix="\033[0m";
 
 clear;
-echo -e "流解锁测试 SteramUnlockTest";
-echo -e "当前版本: v${shell_version}";
+echo -e "###############################################################";
+echo -e "#  流解锁测试 SteramUnlockTest";
+echo -e "#  当前版本: ${Font_SkyBlue}v${shell_version}${Font_Suffix}";
+echo -e "#  ${Font_Yellow}开源地址: https://github.com/LovelyHaochi/StreamUnlockTest${Font_Suffix}";
+echo -e "###############################################################";
 
 export LANG="en_US.UTF-8";
 export LANGUAGE="en_US.UTF-8";
@@ -69,7 +72,7 @@ function MediaUnlockTest_ABC() {
         fi
     else
         # 下载页面失败，返回错误代码
-        echo -e "\r ABC:\t\t\t\t\t${Font_Red}Failed (Network Connection)${Font_Suffix}\n";
+        echo -n -e "\r ABC:\t\t\t\t\t${Font_Red}Failed (Network Connection)${Font_Suffix}\n";
     fi
 }
 
@@ -88,7 +91,7 @@ function MediaUnlockTest_DAZN() {
         fi
     else
         # 下载页面失败，返回错误代码
-        echo -e "\r DAZN:\t\t\t\t\t${Font_Red}Failed (Network Connection)${Font_Suffix}\n";
+        echo -n -e "\r DAZN:\t\t\t\t\t${Font_Red}Failed (Network Connection)${Font_Suffix}\n";
     fi
 }
 
@@ -107,7 +110,7 @@ function MediaUnlockTest_HBONow() {
         fi
     else
         # 下载页面失败，返回错误代码
-        echo -e "\r HBO Now:\t\t\t\t${Font_Red}Failed (Network Connection)${Font_Suffix}\n";
+        echo -n -e "\r HBO Now:\t\t\t\t${Font_Red}Failed (Network Connection)${Font_Suffix}\n";
     fi
 }
 
@@ -411,3 +414,5 @@ if [[ "$check6" != *"unreachable"* ]] && [[ "$check6" != *"Unreachable"* ]];then
 else
     echo -e "${Font_SkyBlue}当前主机不支持IPv6,跳过...${Font_Suffix}";
 fi
+
+echo -e "\n${Font_Green}测试完成.${Font_Suffix}\n"
