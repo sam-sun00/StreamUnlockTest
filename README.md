@@ -26,6 +26,10 @@ bash <(curl -sSL "https://git.io/JswGm")
 - Steam 货币
 - 公主连结Re:Dive
 
+## 运行截图
+![](https://i.loli.net/2021/05/19/eLJUrsD1q4Ez2o7.png)
+![](https://i.loli.net/2021/05/19/CiuPeyFtKdTz9G3.png)
+
 ## 鸣谢
 - [LemonBench](https://github.com/LemonBench/LemonBench)
 - [MediaUnlock_Test](https://github.com/CoiaPrant/MediaUnlock_Test)
