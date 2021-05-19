@@ -3,7 +3,7 @@
 
 ## 使用方法
 ```bash
-bash <(curl -sSL "https://github.com/LovelyHaochi/StreamUnlockTest/raw/main/media_test.sh")
+bash <(curl -sSL "https://git.io/JswGm")
 ```
 
 ## 支持列表
