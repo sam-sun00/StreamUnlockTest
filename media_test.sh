@@ -378,8 +378,8 @@ function MediaUnlockTest() {
 
 function IPInfo() {
 	echo -e -n " IP:\t\t\t\t\t->\c";
-	local result=`curl -${1} -fsSL https://api.ip.sb/geoip 2>&1`;
-	local ip=`echo ${result} | jq .ip | sed 's/"//g' 2>&1`;
+	local ip=`curl -fsSL http://ipv${1}.ip.sb 2>&1`;
+	local result=`curl -fsSL https://api.ip.sb/geoip/${ip} 2>&1`;
 	local country=`echo ${result} | jq .country_code | sed 's/"//g' 2>&1`;
 	echo -e -n "\r IP:\t\t\t\t\t${Font_Green}${ip}(Country: ${country})${Font_Suffix}\n";
 }
