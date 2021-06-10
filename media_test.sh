@@ -1,7 +1,9 @@
 #!/bin/bash
-shell_version="1.0.5";
+shell_version="1.1.0";
 UA_Browser="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.87 Safari/537.36";
 UA_Dalvik="Dalvik/2.1.0 (Linux; U; Android 9; ALP-AL00 Build/HUAWEIALP-AL00)";
+Disney_Auth="grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange&latitude=0&longitude=0&platform=browser&subject_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiNDAzMjU0NS0yYmE2LTRiZGMtOGFlOS04ZWI3YTY2NzBjMTIiLCJhdWQiOiJ1cm46YmFtdGVjaDpzZXJ2aWNlOnRva2VuIiwibmJmIjoxNjIyNjM3OTE2LCJpc3MiOiJ1cm46YmFtdGVjaDpzZXJ2aWNlOmRldmljZSIsImV4cCI6MjQ4NjYzNzkxNiwiaWF0IjoxNjIyNjM3OTE2LCJqdGkiOiI0ZDUzMTIxMS0zMDJmLTQyNDctOWQ0ZC1lNDQ3MTFmMzNlZjkifQ.g-QUcXNzMJ8DwC9JqZbbkYUSKkB1p4JGW77OON5IwNUcTGTNRLyVIiR8mO6HFyShovsR38HRQGVa51b15iAmXg&subject_token_type=urn%3Abamtech%3Aparams%3Aoauth%3Atoken-type%3Adevice"
+Disney_Header="authorization: Bearer ZGlzbmV5JmJyb3dzZXImMS4wLjA.Cu56AgSfBTDag5NiRA81oLHkDZfu5L3CKadnefEAY84"
 Font_Black="\033[30m";
 Font_Red="\033[31m";
 Font_Green="\033[32m";
@@ -33,9 +35,24 @@ function InstallJQ() {
         echo -e "${Font_Green}正在更新软件包列表...${Font_Suffix}";
         apt-get update -y > /dev/null;
         echo -e "${Font_Green}正在安装依赖: jq${Font_Suffix}";
-        apt-get install jq > /dev/null;
+        apt-get install jq -y > /dev/null;
     else
         echo -e "${Font_Red}请手动安装jq${Font_Suffix}";
+        exit;
+    fi
+}
+
+function InstallCurl() {
+    if [ -e "/etc/redhat-release" ];then
+        echo -e "${Font_Green}正在安装依赖: curl${Font_Suffix}";
+        yum install curl -y > /dev/null;
+    elif [[ $(cat /etc/os-release | grep '^ID=') =~ ubuntu ]] || [[ $(cat /etc/os-release | grep '^ID=') =~ debian ]];then
+        echo -e "${Font_Green}正在更新软件包列表...${Font_Suffix}";
+        apt-get update -y > /dev/null;
+        echo -e "${Font_Green}正在安装依赖: curl${Font_Suffix}";
+        apt-get install curl -y > /dev/null;
+    else
+        echo -e "${Font_Red}请手动安装curl${Font_Suffix}";
         exit;
     fi
 }
@@ -222,23 +239,23 @@ function MediaUnlockTest_BilibiliTW() {
 function MediaUnlockTest_AbemaTV_IPTest() {
     echo -n -e " Abema.TV:\t\t\t\t->\c";
     #
-    local result=`curl --user-agent "${UA_Dalvik}" -${1} -fsL --write-out %{http_code} --max-time 30 "https://api.abema.io/v1/ip/check?device=android"`;
-    if [[ "$result" == "000" ]]; then
-        echo -n -e "\r Abema.TV:\t\t\t\t${Font_Red}Failed (Network Connection)${Font_Suffix}\n";
+    local tempresult=`curl --user-agent "${UA_Dalvik}" -${1} -fsL --write-out %{http_code} --max-time 30 "https://api.abema.io/v1/ip/check?device=android" 2>&1`;
+    if [[ "$tempresult" == "000" ]]; then
+        echo -n -e "\r Abema.TV:\t\t\t\t${Font_Red}Failed (Network Connection)${Font_Suffix}\n"
         return;
     fi
-    local result=`curl --user-agent "${UA_Dalvik}" -${1} -fsL --max-time 30 "https://api.abema.io/v1/ip/check?device=android"`;
-    local result="$(PharseJSON "${result}" "cdnRegionUrl")";
-    if [ "$?" = "0" ]; then
-        if [ "${result}" = "https://ds-linear-abematv.akamaized.net/region" ] || [ "${result}" = "https://ds-glb-linear-abematv.akamaized.net/region" ]; then
-            echo -n -e "\r Abema.TV:\t\t\t\t${Font_Green}Yes${Font_Suffix}\n";
-            elif [ "${result}" = "" ] || [ "${result}" = "null" ]; then
-            echo -n -e "\r Abema.TV:\t\t\t\t${Font_Red}No${Font_Suffix}\n";
-        else
-            echo -n -e "\r Abema.TV:\t\t\t\t${Font_Red}Failed${Font_Suffix}\n";
-        fi
-    else
-        echo -n -e "\r Abema.TV:\t\t\t\t${Font_Red}Failed (Parse Json)${Font_Suffix}\n";
+	
+    local result=`curl --user-agent "${UA_Dalvik}" -${1} -fsL --max-time 30 "https://api.abema.io/v1/ip/check?device=android" 2>&1`;
+	local result=`PharseJSON "${result}" "isoCountryCode"`
+	if [ -n "$result" ]; then
+		if [[ "$result" == "JP" ]]
+			then
+				echo -n -e "\r Abema.TV:\t\t\t\t${Font_Green}Yes(Region: JP)${Font_Suffix}\n"
+			else
+				echo -n -e "\r Abema.TV:\t\t\t\t${Font_Yellow}Only overseas${Font_Suffix}\n"
+		fi
+	else
+        echo -n -e "\r Abema.TV:\t\t\t\t${Font_Red}No${Font_Suffix}\n"
     fi
 }
 
@@ -254,6 +271,36 @@ function GameTest_PCRJP() {
         echo -n -e "\r Princess Connect Re:Dive Japan:\t${Font_Red}No${Font_Suffix}\n";
     else
         echo -n -e "\r Princess Connect Re:Dive Japan:\t${Font_Red}Failed (Unexpected Result: $result)${Font_Suffix}\n";
+    fi
+}
+
+function GameTest_UMAJP() {
+    echo -n -e " Pretty Derby Japan:\t\t\t->\c";
+    # 测试，连续请求两次 (单独请求一次可能会返回35, 第二次开始变成0)
+    local result=`curl --user-agent "${UA_Dalvik}" -${1} -fsL --write-out %{http_code} --output /dev/null --max-time 30 https://api-umamusume.cygames.jp/`;
+    if [ "$result" = "000" ]; then
+        echo -n -e "\r Pretty Derby Japan:\t\t\t${Font_Red}Failed (Network Connection)${Font_Suffix}\n"
+    elif [ "$result" = "404" ]; then
+        echo -n -e "\r Pretty Derby Japan:\t\t\t${Font_Green}Yes${Font_Suffix}\n"
+	elif [ "$result" = "403" ]; then
+        echo -n -e "\r Pretty Derby Japan:\t\t\t${Font_Red}No${Font_Suffix}\n"
+    else
+        echo -n -e "\r Pretty Derby Japan:\t\t\t${Font_Red}No${Font_Suffix}\n"
+    fi
+}
+
+function GameTest_Kancolle() {
+    echo -n -e " Kancolle Japan:\t\t\t->\c";
+    # 测试，连续请求两次 (单独请求一次可能会返回35, 第二次开始变成0)
+    local result=`curl --user-agent "${UA_Dalvik}" -${1} -fsL --write-out %{http_code} --output /dev/null --max-time 30 http://203.104.209.7/kcscontents/`;
+    if [ "$result" = "000" ]; then
+        echo -n -e "\r Kancolle Japan:\t\t\t${Font_Red}Failed (Network Connection)${Font_Suffix}\n"
+        elif [ "$result" = "200" ]; then
+        echo -n -e "\r Kancolle Japan:\t\t\t${Font_Green}Yes${Font_Suffix}\n"
+        elif [ "$result" = "403" ]; then
+        echo -n -e "\r Kancolle Japan:\t\t\t${Font_Red}No${Font_Suffix}\n"
+    else
+        echo -n -e "\r Kancolle Japan:\t\t\t${Font_Red}Failed (Unexpected Result: $result)${Font_Suffix}\n"
     fi
 }
 
@@ -332,62 +379,231 @@ function MediaUnlockTest_YouTube_Region() {
 
 function MediaUnlockTest_DisneyPlus() {
     echo -n -e " DisneyPlus:\t\t\t\t->\c";
-    local result=`curl -${1} --user-agent "${UA_Browser}" -sSL "https://www.disneyplus.com/movies/drain-the-titanic/5VNZom2KYtlb" 2>&1`;
+    local result=`curl -${1} --user-agent "${UA_Browser}" -sSL "https://global.edge.bamgrid.com/token" 2>&1`;
     
     if [[ "$result" == "curl"* ]];then
-        echo -n -e "\r DisneyPlus:\t\t\t\t${Font_Red}Failed (Network Connection)${Font_Suffix}\n";
+        echo -n -e "\r DisneyPlus:\t\t\t\t${Font_Red}Failed (Network Connection)${Font_Suffix}\n"
         return;
     fi
+	
+	local previewcheck=`curl -s -o /dev/null -L --max-time 30 -w '%{url_effective}\n' "https://disneyplus.com" | grep preview 2>&1`;
+	if [ -n "${previewcheck}" ];then
+		echo -n -e "\r DisneyPlus:\t\t\t\t${Font_Red}No${Font_Suffix}\n"
+		return;
+	fi	
+		
     
-    if [[ "$result" == *"https://preview.disneyplus.com/unavailable/"* ]];then
-        echo -n -e "\r DisneyPlus:\t\t\t\t${Font_Red}Unsupport${Font_Suffix}\n";
-        return;
+	local result=`curl -${1} -s --user-agent "${UA_Browser}" -H "Content-Type: application/x-www-form-urlencoded" -H "${Disney_Header}" -d ''${Disney_Auth}'' -X POST  "https://global.edge.bamgrid.com/token" 2>&1`
+	local access_token=`PharseJSON "${result}" "access_token"`
+
+    if [[ "$access_token" == "null" ]]; then
+		echo -n -e "\r DisneyPlus:\t\t\t\t${Font_Red}No${Font_Suffix}\n"
+		return;
+	fi
+	
+	region=$(curl -${1} -s https://www.disneyplus.com | grep 'region: ' | awk '{print $2}')
+	if [ -n "$region" ]; then
+		echo -n -e "\r DisneyPlus:\t\t\t\t${Font_Green}Yes(Region: ${region})${Font_Suffix}\n"
+		return;
+	else
+		local website=$(curl -${1} --user-agent "${UA_Browser}" -fs --write-out '%{redirect_url}\n' --output /dev/null "https://www.disneyplus.com")
+		if [[ "${website}" == "https://disneyplus.disney.co.jp/" ]]; then
+			echo -n -e "\r DisneyPlus:\t\t\t\t${Font_Green}Yes(Region: JP)${Font_Suffix}\n"
+			return;
+		else
+			#local region=`echo ${website} | cut -f4 -d '/' | tr 'a-z' 'A-Z'`
+			echo -n -e "\r DisneyPlus:\t\t\t\t${Font_Green}Yes(Region: Unknow)${Font_Suffix}\n"
+			return;
+		fi
+	fi
+}
+
+# Hulu JP
+function MediaUnlockTest_HuluJP() {
+    echo -n -e " Hulu Japan:\t\t\t\t->\c";
+    local result=`curl -${1} -s -o /dev/null -L --max-time 30 -w '%{url_effective}\n' "https://id.hulu.jp" | grep login`;
+    
+	if [ -n "$result" ]; then
+		echo -n -e "\r Hulu Japan:\t\t\t\t${Font_Green}Yes${Font_Suffix}\n"
+		return;
+     else
+		echo -n -e "\r Hulu Japan:\t\t\t\t${Font_Red}No${Font_Suffix}\n"
+		return;
+	fi
+	
+	echo -n -e "\r Hulu Japan:\t\t\t\t${Font_Red}Failed (Network Connection)${Font_Suffix}\n"
+	return;
+
+}
+
+# MyTvSuper
+function MediaUnlockTest_MyTVSuper() {
+    echo -n -e " MyTVSuper:\t\t\t\t->\c";
+    local result=`curl -s -${1} --max-time 30 https://www.mytvsuper.com/iptest.php | grep HK`;
+    
+	if [ -n "$result" ]; then
+		echo -n -e "\r MyTVSuper:\t\t\t\t${Font_Green}Yes${Font_Suffix}\n"
+		return;
+     else
+		echo -n -e "\r MyTVSuper:\t\t\t\t${Font_Red}No${Font_Suffix}\n"
+		return;
+	fi
+	
+	echo -n -e "\r MyTVSuper:\t\t\t\t${Font_Red}Failed (Network Connection)${Font_Suffix}\n"
+	return;
+
+}
+
+# Now E
+function MediaUnlockTest_NowE() {
+    echo -n -e " Now E:\t\t\t\t\t->\c";
+    local result=`curl -${1} -k --ciphers DEFAULT@SECLEVEL=1 -s --max-time 30 -X POST -H "Content-Type: application/json" -d '{"contentId":"202105121370235","contentType":"Vod","pin":"","deviceId":"W-60b8d30a-9294-d251-617b-c12f9d0c","deviceType":"WEB"}' "https://webtvapi.nowe.com/16/1/getVodURL" 2>&1`;
+	local result=`PharseJSON "${result}" "responseCode"`
+    
+	if [[ "$result" == "SUCCESS" ]]; then
+		echo -n -e "\r Now E:\t\t\t\t\t${Font_Green}Yes${Font_Suffix}\n"
+		return;
+    else
+		echo -n -e "\r Now E:\t\t\t\t\t${Font_Red}No${Font_Suffix}\n"
+		return;
+	fi
+	
+	echo -n -e "\r Now E:\t\t\t\t\t${Font_Red}Failed (Network Connection)${Font_Suffix}\n"
+	return;
+
+}
+
+# Viu.TV
+function MediaUnlockTest_ViuTV() {
+    echo -n -e " ViuTV:\t\t\t\t\t->\c";
+    local result=`curl -${1} -k --ciphers DEFAULT@SECLEVEL=1 -s --max-time 30 -X POST -H "Content-Type: application/json" -d '{"callerReferenceNo":"20210603233037","productId":"202009041154906","contentId":"202009041154906","contentType":"Vod","mode":"prod","PIN":"password","cookie":"3c2c4eafe3b0d644b8","deviceId":"U5f1bf2bd8ff2ee000","deviceType":"ANDROID_WEB","format":"HLS"}' "https://api.viu.now.com/p8/3/getVodURL" 2>&1`;
+	local result=`PharseJSON "${result}" "responseCode"`
+    
+	if [[ "$result" == "SUCCESS" ]]; then
+		echo -n -e "\r ViuTV:\t\t\t\t\t${Font_Green}Yes${Font_Suffix}\n"
+		return;
+    else
+		echo -n -e "\r ViuTV:\t\t\t\t\t${Font_Red}No${Font_Suffix}\n"
+		return;
+	fi
+	
+	echo -n -e "\r ViuTV:\t\t\t\t\t${Font_Red}Failed (Network Connection)${Font_Suffix}\n"
+	return;
+
+}
+
+# U-NEXT
+function MediaUnlockTest_unext() {
+    echo -n -e " U-NEXT:\t\t\t\t->\c";
+    local result=`curl -${1} -s --max-time 30 "https://video-api.unext.jp/api/1/player?entity%5B%5D=playlist_url&episode_code=ED00148814&title_code=SID0028118&keyonly_flg=0&play_mode=caption&bitrate_low=1500" 2>&1`;
+	local result=`PharseJSON "${result}" "data.entities_data.playlist_url.result_status"`
+	
+    if [ -n "$result" ]; then 
+		if [[ "$result" == "475" ]]; then
+			echo -n -e "\r U-NEXT:\t\t\t\t${Font_Green}Yes${Font_Suffix}\n"
+			return;
+		elif [[ "$result" == "200" ]]; then
+			echo -n -e "\r U-NEXT:\t\t\t\t${Font_Green}Yes${Font_Suffix}\n"
+			return;	
+		elif [[ "$result" == "467" ]]; then
+			echo -n -e "\r U-NEXT:\t\t\t\t${Font_Red}No${Font_Suffix}\n"
+			return;
+		else
+			echo -n -e "\r U-NEXT:\t\t\t\t${Font_Red}No${Font_Suffix}\n"
+			return;
+		fi	
+	else
+		echo -n -e "\r U-NEXT:\t\t\t\t${Font_Red}Failed (Network Connection)${Font_Suffix}\n"
+		return;
+	fi
+
+}
+
+# Paravi
+function MediaUnlockTest_Paravi() {
+    echo -n -e " Paravi:\t\t\t\t->\c";
+    local tmpresult=`curl -${1} -s --max-time 30 -H "Content-Type: application/json" -d '{"meta_id":71885,"vuid":"3b64a775a4e38d90cc43ea4c7214702b","device_code":1,"app_id":1}' https://api.paravi.jp/api/v1/playback/auth 2>&1`;
+	
+	if [[ "$tmpresult" == "curl"* ]];then
+        	echo -n -e "\r Paravi:\t\t\t\t${Font_Red}Failed (Network Connection)${Font_Suffix}\n"
+        	return;
     fi
-    
-    if [[ "$result" == *"releaseYear"* ]];then
-        echo -n -e "\r DisneyPlus:\t\t\t\t${Font_Green}Yes${Font_Suffix}\n";
-        return;
-    fi
-    
-    echo -n -e "\r DisneyPlus:\t\t\t\t${Font_Red}No${Font_Suffix}\n";
-    return;
+	
+	checkiffaild=`PharseJSON "${tmpresult}" "error.code"`;
+    if [[ "$checkiffaild" == "2055" ]]; then
+		echo -n -e "\r Paravi:\t\t\t\t${Font_Red}No${Font_Suffix}\n"
+		return;
+	fi
+	
+	local result=`echo ${tmpresult} | grep 'playback_validity_end_at' 2>&1`
+	
+	if [[ "${result}" -eq 0 ]]; then
+		echo -n -e "\r Paravi:\t\t\t\t${Font_Green}Yes${Font_Suffix}\n"
+		return;
+	else
+		echo -n -e "\r Paravi:\t\t\t\t${Font_Red}No${Font_Suffix}\n"
+		return;
+	fi
+
 }
 
 function MediaUnlockTest() {
 	IPInfo ${1};
-	echo ""
-	echo " -- Media --";
-    MediaUnlockTest_HBONow ${1};
-    MediaUnlockTest_BahamutAnime ${1};
-    MediaUnlockTest_AbemaTV_IPTest ${1};
-    MediaUnlockTest_BBC ${1};
+	
+	#echo ""
+	#echo " -- Media --";
+	
+	echo -e "\n -- Greater China --"
     MediaUnlockTest_BilibiliChinaMainland ${1};
     MediaUnlockTest_BilibiliHKMCTW ${1};
     MediaUnlockTest_BilibiliTW ${1};
-    MediaUnlockTest_Netflix ${1};
+    MediaUnlockTest_BahamutAnime ${1};
+	MediaUnlockTest_MyTVSuper ${1};
+	MediaUnlockTest_NowE ${1};
+	MediaUnlockTest_ViuTV ${1};
+	
+	echo -e "\n -- Japan --"
+    MediaUnlockTest_AbemaTV_IPTest ${1};
+	MediaUnlockTest_Paravi ${1};
+	MediaUnlockTest_unext ${1};
+	MediaUnlockTest_HuluJP ${1};
+	GameTest_PCRJP ${1};
+	GameTest_UMAJP ${1};
+	GameTest_Kancolle ${1};
+	
+	echo -e "\n -- Europe and America --"
+	MediaUnlockTest_HBONow ${1};
+	MediaUnlockTest_ABC ${1};
+	MediaUnlockTest_BBC ${1};
+	
+	echo -e "\n -- Global --"
+	MediaUnlockTest_Netflix ${1};
     MediaUnlockTest_YouTube_Region ${1};
     MediaUnlockTest_DisneyPlus ${1};
 	MediaUnlockTest_DAZN ${1};
-	MediaUnlockTest_ABC ${1};
-	
-	echo ""
-	echo " -- Game --"
-    GameTest_Steam ${1};
-	GameTest_PCRJP ${1};
+	GameTest_Steam ${1};
+
 }
 
 function IPInfo() {
 	echo -e -n " IP:\t\t\t\t\t->\c";
 	local ip=`curl -fsSL http://ipv${1}.ip.sb 2>&1`;
 	local result=`curl -fsSL https://api.ip.sb/geoip/${ip} 2>&1`;
-	local country=`echo ${result} | jq .country_code | sed 's/"//g' 2>&1`;
-	echo -e -n "\r IP:\t\t\t\t\t${Font_Green}${ip}(Country: ${country})${Font_Suffix}\n";
+	echo -e -n "\r IP:\t\t\t\t\t${Font_Green}${ip}${Font_Suffix}\n";
+	
+	echo -e -n " Country:\t\t\t\t->\c";
+	local country=`PharseJSON "${result}" "country"`;
+	echo -e -n "\r Country:\t\t\t\t${Font_Green}${country}${Font_Suffix}\n";
+	
+	echo -e -n " ISP:\t\t\t\t\t->\c";
+	local isp=`PharseJSON "${result}" "isp"`;
+	echo -e -n "\r ISP:\t\t\t\t\t${Font_Green}${isp}${Font_Suffix}\n";
+	
 }
 
 curl -V > /dev/null 2>&1;
 if [ $? -ne 0 ];then
-    echo -e "${Font_Red}请先安装curl${Font_Suffix}";
-    exit;
+    InstallCurl;
 fi
 
 jq -V > /dev/null 2>&1;
