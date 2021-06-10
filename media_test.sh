@@ -535,9 +535,10 @@ function MediaUnlockTest_Paravi() {
 		return;
 	fi
 	
+	
 	local result=`echo ${tmpresult} | grep 'playback_validity_end_at' 2>&1`
 	
-	if [[ "${result}" -eq 0 ]]; then
+	if [ -n "${result}" ]; then
 		echo -n -e "\r Paravi:\t\t\t\t${Font_Green}Yes${Font_Suffix}\n"
 		return;
 	else
