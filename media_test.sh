@@ -1,5 +1,5 @@
 #!/bin/bash
-shell_version="1.1.3";
+shell_version="1.1.4";
 UA_Browser="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.87 Safari/537.36";
 UA_Dalvik="Dalvik/2.1.0 (Linux; U; Android 9; ALP-AL00 Build/HUAWEIALP-AL00)";
 Disney_Auth="grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange&latitude=0&longitude=0&platform=browser&subject_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiNDAzMjU0NS0yYmE2LTRiZGMtOGFlOS04ZWI3YTY2NzBjMTIiLCJhdWQiOiJ1cm46YmFtdGVjaDpzZXJ2aWNlOnRva2VuIiwibmJmIjoxNjIyNjM3OTE2LCJpc3MiOiJ1cm46YmFtdGVjaDpzZXJ2aWNlOmRldmljZSIsImV4cCI6MjQ4NjYzNzkxNiwiaWF0IjoxNjIyNjM3OTE2LCJqdGkiOiI0ZDUzMTIxMS0zMDJmLTQyNDctOWQ0ZC1lNDQ3MTFmMzNlZjkifQ.g-QUcXNzMJ8DwC9JqZbbkYUSKkB1p4JGW77OON5IwNUcTGTNRLyVIiR8mO6HFyShovsR38HRQGVa51b15iAmXg&subject_token_type=urn%3Abamtech%3Aparams%3Aoauth%3Atoken-type%3Adevice"
@@ -80,9 +80,9 @@ function MediaUnlockTest_ABC() {
     local result=`curl -${1} --max-time 30 -fsSL -H 'Content-Type: application/x-www-form-urlencoded' -X POST -d 'type=gt&brand=001&device=001' https://prod.gatekeeper.us-abc.symphony.edgedatg.go.com/vp2/ws/utils/2020/geo/video/geolocation.json 2>&1`;
     if [[ "$result" != "curl"* ]]; then
         # 下载页面成功，开始解析跳转
-		local isAllowed=`echo ${result} | jq .user.allowed 2>&1`;
+		local isAllowed=`PharseJSON "${result}" "user.allowed"`;
         if [ "${isAllowed}" = "true" ]; then
-			local Country=`echo ${result} | jq .user.country 2>&1`
+			local Country=`PharseJSON "${result}" "user.country" | tr 'a-z' 'A-Z'`
             echo -n -e "\r ABC:\t\t\t\t\t${Font_Green}Yes(Country: ${Country})${Font_Suffix}\n";
         else
             echo -n -e "\r ABC:\t\t\t\t\t${Font_Red}No${Font_Suffix}\n";
