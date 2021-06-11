@@ -16,7 +16,7 @@ Font_Suffix="\033[0m";
 
 clear;
 echo -e "###############################################################";
-echo -e "#  流解锁测试 SteramUnlockTest";
+echo -e "#  流解锁测试 StreamUnlockTest";
 echo -e "#  当前版本: ${Font_SkyBlue}v${shell_version}${Font_Suffix}";
 echo -e "#  ${Font_Yellow}开源地址: https://github.com/LovelyHaochi/StreamUnlockTest${Font_Suffix}";
 echo -e "###############################################################";
