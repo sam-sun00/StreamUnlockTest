@@ -1,5 +1,5 @@
 #!/bin/bash
-shell_version="1.1.1";
+shell_version="1.1.2";
 UA_Browser="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.87 Safari/537.36";
 UA_Dalvik="Dalvik/2.1.0 (Linux; U; Android 9; ALP-AL00 Build/HUAWEIALP-AL00)";
 Disney_Auth="grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange&latitude=0&longitude=0&platform=browser&subject_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiNDAzMjU0NS0yYmE2LTRiZGMtOGFlOS04ZWI3YTY2NzBjMTIiLCJhdWQiOiJ1cm46YmFtdGVjaDpzZXJ2aWNlOnRva2VuIiwibmJmIjoxNjIyNjM3OTE2LCJpc3MiOiJ1cm46YmFtdGVjaDpzZXJ2aWNlOmRldmljZSIsImV4cCI6MjQ4NjYzNzkxNiwiaWF0IjoxNjIyNjM3OTE2LCJqdGkiOiI0ZDUzMTIxMS0zMDJmLTQyNDctOWQ0ZC1lNDQ3MTFmMzNlZjkifQ.g-QUcXNzMJ8DwC9JqZbbkYUSKkB1p4JGW77OON5IwNUcTGTNRLyVIiR8mO6HFyShovsR38HRQGVa51b15iAmXg&subject_token_type=urn%3Abamtech%3Aparams%3Aoauth%3Atoken-type%3Adevice"
@@ -16,7 +16,7 @@ Font_Suffix="\033[0m";
 
 clear;
 echo -e "###############################################################";
-echo -e "#  流解锁测试 StreamUnlockTest";
+echo -e "#  流解锁测试 SteramUnlockTest";
 echo -e "#  当前版本: ${Font_SkyBlue}v${shell_version}${Font_Suffix}";
 echo -e "#  ${Font_Yellow}开源地址: https://github.com/LovelyHaochi/StreamUnlockTest${Font_Suffix}";
 echo -e "###############################################################";
@@ -587,18 +587,31 @@ function MediaUnlockTest() {
 }
 
 function IPInfo() {
-	echo -e -n " IP:\t\t\t\t\t->\c";
 	local ip=`curl -fsSL http://ipv${1}.ip.sb 2>&1`;
-	local result=`curl -fsSL https://api.ip.sb/geoip/${ip} 2>&1`;
+	local result=`curl -fsSL http://ip-api.com/json/${ip} 2>&1`;
+	
+	echo -e -n " IP:\t\t\t\t\t->\c";
 	echo -e -n "\r IP:\t\t\t\t\t${Font_Green}${ip}${Font_Suffix}\n";
 	
 	echo -e -n " Country:\t\t\t\t->\c";
 	local country=`PharseJSON "${result}" "country"`;
 	echo -e -n "\r Country:\t\t\t\t${Font_Green}${country}${Font_Suffix}\n";
 	
+	echo -e -n " Region:\t\t\t\t->\c";
+	local region=`PharseJSON "${result}" "regionName"`;
+	echo -e -n "\r Region:\t\t\t\t${Font_Green}${region}${Font_Suffix}\n";
+	
+	echo -e -n " City:\t\t\t\t\t->\c";
+	local city=`PharseJSON "${result}" "city"`;
+	echo -e -n "\r City:\t\t\t\t\t${Font_Green}${city}${Font_Suffix}\n";
+	
 	echo -e -n " ISP:\t\t\t\t\t->\c";
 	local isp=`PharseJSON "${result}" "isp"`;
 	echo -e -n "\r ISP:\t\t\t\t\t${Font_Green}${isp}${Font_Suffix}\n";
+	
+	echo -e -n " Org:\t\t\t\t\t->\c";
+	local org=`PharseJSON "${result}" "org"`;
+	echo -e -n "\r Org:\t\t\t\t\t${Font_Green}${org}${Font_Suffix}\n";
 	
 }
 
