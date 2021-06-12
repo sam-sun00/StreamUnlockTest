@@ -1,5 +1,5 @@
 #!/bin/bash
-shell_version="1.1.4";
+shell_version="1.1.5";
 UA_Browser="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.87 Safari/537.36";
 UA_Dalvik="Dalvik/2.1.0 (Linux; U; Android 9; ALP-AL00 Build/HUAWEIALP-AL00)";
 Disney_Auth="grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange&latitude=0&longitude=0&platform=browser&subject_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiNDAzMjU0NS0yYmE2LTRiZGMtOGFlOS04ZWI3YTY2NzBjMTIiLCJhdWQiOiJ1cm46YmFtdGVjaDpzZXJ2aWNlOnRva2VuIiwibmJmIjoxNjIyNjM3OTE2LCJpc3MiOiJ1cm46YmFtdGVjaDpzZXJ2aWNlOmRldmljZSIsImV4cCI6MjQ4NjYzNzkxNiwiaWF0IjoxNjIyNjM3OTE2LCJqdGkiOiI0ZDUzMTIxMS0zMDJmLTQyNDctOWQ0ZC1lNDQ3MTFmMzNlZjkifQ.g-QUcXNzMJ8DwC9JqZbbkYUSKkB1p4JGW77OON5IwNUcTGTNRLyVIiR8mO6HFyShovsR38HRQGVa51b15iAmXg&subject_token_type=urn%3Abamtech%3Aparams%3Aoauth%3Atoken-type%3Adevice"
@@ -14,11 +14,15 @@ Font_SkyBlue="\033[36m";
 Font_White="\033[37m";
 Font_Suffix="\033[0m";
 
+
 clear;
 echo -e "###############################################################";
-echo -e "#  流解锁测试 StreamUnlockTest";
+echo -e "#  流解锁测试 StreamUnlockTest${Font_Suffix}";
 echo -e "#  当前版本: ${Font_SkyBlue}v${shell_version}${Font_Suffix}";
 echo -e "#  ${Font_Yellow}开源地址: https://github.com/LovelyHaochi/StreamUnlockTest${Font_Suffix}";
+echo -e "###############################################################";
+echo -e "#  国家代码对照表: ${Font_Yellow}http://www.loglogo.com/front/countryCode/${Font_Suffix}"
+echo -e "#  测试时间: $(date)"
 echo -e "###############################################################";
 
 export LANG="en_US.UTF-8";
@@ -120,14 +124,31 @@ function MediaUnlockTest_HBONow() {
         # 下载页面成功，开始解析跳转
         if [ "${result}" = "https://play.hbonow.com" ] || [ "${result}" = "https://play.hbonow.com/" ]; then
             echo -n -e "\r HBO Now:\t\t\t\t${Font_Green}Yes${Font_Suffix}\n";
-            elif [ "${result}" = "http://hbogeo.cust.footprint.net/hbonow/geo.html" ] || [ "${result}" = "http://geocust.hbonow.com/hbonow/geo.html" ]; then
+        elif [ "${result}" = "http://hbogeo.cust.footprint.net/hbonow/geo.html" ] || [ "${result}" = "http://geocust.hbonow.com/hbonow/geo.html" ]; then
             echo -n -e "\r HBO Now:\t\t\t\t${Font_Red}No${Font_Suffix}\n";
         else
-            echo -n -e "\r HBO Now:\t\t\t\t${Font_Yellow}Failed (Parse Json)${Font_Suffix}\n";
+            echo -n -e "\r HBO Now:\t\t\t\t${Font_Yellow}Failed${Font_Suffix}\n";
         fi
     else
         # 下载页面失败，返回错误代码
         echo -n -e "\r HBO Now:\t\t\t\t${Font_Red}Failed (Network Connection)${Font_Suffix}\n";
+    fi
+}
+
+function MediaUnlockTest_HBOMax() {
+    echo -n -e " HBO Max:\t\t\t\t->\c";
+    # 尝试获取成功的结果
+    local result=`curl --user-agent "${UA_Browser}" -${1} -fsSL --max-time 30 "https://www.hbomax.com" 2>&1`;
+    if [[ "$result" != "curl"* ]]; then
+        # 下载页面成功，开始解析跳转
+        if [[ "${result}" == *"Not in service area"* ]]; then
+            echo -n -e "\r HBO Max:\t\t\t\t${Font_Green}Yes${Font_Suffix}\n";
+        else
+            echo -n -e "\r HBO Max:\t\t\t\t${Font_Red}No${Font_Suffix}\n";
+        fi
+    else
+        # 下载页面失败，返回错误代码
+        echo -n -e "\r HBO Max:\t\t\t\t${Font_Red}Failed (Network Connection)${Font_Suffix}\n";
     fi
 }
 
@@ -573,6 +594,7 @@ function MediaUnlockTest() {
 	GameTest_Kancolle ${1};
 	
 	echo -e "\n -- Europe and America --"
+	MediaUnlockTest_HBOMax ${1};
 	MediaUnlockTest_HBONow ${1};
 	MediaUnlockTest_ABC ${1};
 	MediaUnlockTest_BBC ${1};
