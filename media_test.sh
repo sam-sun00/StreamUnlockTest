@@ -1,5 +1,5 @@
 #!/bin/bash
-shell_version="1.2.0";
+shell_version="1.2.1";
 UA_Browser="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.87 Safari/537.36";
 UA_Dalvik="Dalvik/2.1.0 (Linux; U; Android 9; ALP-AL00 Build/HUAWEIALP-AL00)";
 Disney_Auth="grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange&latitude=0&longitude=0&platform=browser&subject_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiNDAzMjU0NS0yYmE2LTRiZGMtOGFlOS04ZWI3YTY2NzBjMTIiLCJhdWQiOiJ1cm46YmFtdGVjaDpzZXJ2aWNlOnRva2VuIiwibmJmIjoxNjIyNjM3OTE2LCJpc3MiOiJ1cm46YmFtdGVjaDpzZXJ2aWNlOmRldmljZSIsImV4cCI6MjQ4NjYzNzkxNiwiaWF0IjoxNjIyNjM3OTE2LCJqdGkiOiI0ZDUzMTIxMS0zMDJmLTQyNDctOWQ0ZC1lNDQ3MTFmMzNlZjkifQ.g-QUcXNzMJ8DwC9JqZbbkYUSKkB1p4JGW77OON5IwNUcTGTNRLyVIiR8mO6HFyShovsR38HRQGVa51b15iAmXg&subject_token_type=urn%3Abamtech%3Aparams%3Aoauth%3Atoken-type%3Adevice"
@@ -1133,7 +1133,10 @@ function MediaUnlockTest_KakaoTV(){
 }
 
 function IPInfo() {
-	local ip=$(curl -fsSL http://api-ipv${1}.ip.sb 2>&1);
+	local ip=$(curl --max-time 2 -s http://api-ipv${1}.ip.sb 2>&1);
+    if [[ "${ip}" == "curl"* ]];then
+	    local ip=$(curl --max-time 2 -s http://ipv${1}.ip.sb 2>&1);
+    fi
 	local result=$(curl -fsSL http://ip-api.com/json/${ip} 2>&1);
 	
 	echo -e -n " IP:\t\t\t\t\t->\c";
