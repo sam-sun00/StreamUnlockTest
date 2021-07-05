@@ -1133,13 +1133,10 @@ function MediaUnlockTest_KakaoTV(){
 }
 
 function IPInfo() {
-	local ip=$(curl --max-time 2 -s http://api-ipv${1}.ip.sb 2>&1);
-    if [[ "${ip}" == "curl"* ]];then
-	    local ip=$(curl --max-time 2 -s http://ipv${1}.ip.sb 2>&1);
-    fi
-	local result=$(curl -fsSL http://ip-api.com/json/${ip} 2>&1);
+    local result=$(curl -fsSL http://ip-api.com/json/ 2>&1);
 	
 	echo -e -n " IP:\t\t\t\t\t->\c";
+    local ip=$(PharseJSON "${result}" "query");
 	echo -e -n "\r IP:\t\t\t\t\t${Font_Green}${ip}${Font_Suffix}\n";
 	
 	echo -e -n " Country:\t\t\t\t->\c";
