@@ -16,9 +16,37 @@
 
 ## 使用方法
 
+### 快速入门
+
 ```bash
 bash <(curl -sSL "https://git.io/JswGm")
 ```
+<details>
+<summary>高级用法</summary>
+
+```bash
+bash <(curl -sSL "https://git.io/JswGm") [模式]
+```
+
+模式可选:
+```
+[HK]     Hong Kong
+[TW]     Taiwan
+[JP]     Japan
+[KR]     Korea
+[US]     United States
+[EU]     Europe
+[GLOBAL] Porn + Global
+```
+
+例如:
+
+```bash
+bash <(curl -sSL "https://git.io/JswGm") HK
+```
+则测试香港与国际的流媒体
+
+</details>
 
 ## 支持列表
 

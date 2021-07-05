@@ -1,5 +1,5 @@
 #!/bin/bash
-shell_version="1.1.6";
+shell_version="1.2.0";
 UA_Browser="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.87 Safari/537.36";
 UA_Dalvik="Dalvik/2.1.0 (Linux; U; Android 9; ALP-AL00 Build/HUAWEIALP-AL00)";
 Disney_Auth="grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange&latitude=0&longitude=0&platform=browser&subject_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiNDAzMjU0NS0yYmE2LTRiZGMtOGFlOS04ZWI3YTY2NzBjMTIiLCJhdWQiOiJ1cm46YmFtdGVjaDpzZXJ2aWNlOnRva2VuIiwibmJmIjoxNjIyNjM3OTE2LCJpc3MiOiJ1cm46YmFtdGVjaDpzZXJ2aWNlOmRldmljZSIsImV4cCI6MjQ4NjYzNzkxNiwiaWF0IjoxNjIyNjM3OTE2LCJqdGkiOiI0ZDUzMTIxMS0zMDJmLTQyNDctOWQ0ZC1lNDQ3MTFmMzNlZjkifQ.g-QUcXNzMJ8DwC9JqZbbkYUSKkB1p4JGW77OON5IwNUcTGTNRLyVIiR8mO6HFyShovsR38HRQGVa51b15iAmXg&subject_token_type=urn%3Abamtech%3Aparams%3Aoauth%3Atoken-type%3Adevice"
@@ -758,7 +758,7 @@ function MediaUnlockTest_Molotov(){
 	if [[ "${tmpresult}" == "false" ]]; then
 		echo -n -e "\r Molotov:\t\t\t\t${Font_Red}No${Font_Suffix}\n"
 		return;	
-	elif [ "${tmpresult}" == "true" ]]; then
+	elif [[ "${tmpresult}" == "true" ]]; then
 		echo -n -e "\r Molotov:\t\t\t\t${Font_Green}Yes${Font_Suffix}\n"
 		return;	
 	else
@@ -1013,6 +1013,10 @@ function MediaUnlockTest_Blacked(){
         echo -n -e "\r Blacked:\t\t\t\t${Font_Red}Failed (Network Connection)${Font_Suffix}\n"
         return;
     fi
+
+    local ip=$(curl -fsSL http://api-ipv${1}.ip.sb 2>&1);
+	local ipresult=$(curl -fsSL http://ip-api.com/json/${ip} 2>&1);
+    local country=$(PharseJSON "${ipresult}" "countryCode");
     
 	if [[ "${country}" != "CN" ]];then
         echo -n -e "\r Blacked:\t\t\t\t${Font_Green}Yes(Region: ${country})${Font_Suffix}\n"
@@ -1037,6 +1041,94 @@ function MediaUnlockTest_Biguz(){
 	else
 		echo -n -e "\r Biguz:\t\t\t\t\t${Font_Red}No${Font_Suffix}\n"
 		return;
+    fi
+}
+
+function MediaUnlockTest_Radiko(){
+    echo -n -e " Radiko:\t\t\t\t->\c";
+    local tmpresult=$(curl -${1} --user-agent "${UA_Browser}" -s "https://radiko.jp/area?_=1625406539531")
+
+	if [ "$tmpresult" = "000" ]; then
+		echo -n -e "\r Radiko:\t\t\t\t${Font_Red}Failed (Network Connection)${Font_Suffix}\n"
+		return;
+	fi	
+
+	local checkfailed=$(echo $tmpresult | grep 'class="OUT"')
+    if [ -n "$checkfailed" ];then
+		echo -n -e "\r Radiko:\t\t\t\t${Font_Red}No${Font_Suffix}\n"
+		return;
+	fi
+
+	local checksuccess=$(echo $tmpresult | grep 'JAPAN')
+	if [ -n "$checksuccess" ];then
+		area=$(echo $tmpresult | awk '{print $2}' | sed 's/.*>//')
+        echo -n -e "\r Radiko:\t\t\t\t${Font_Green}Yes(Area: ${area})${Font_Suffix}\n"
+		return;
+    else
+		echo -n -e "\r Radiko:\t\t\t\t${Font_Red}No${Font_Suffix}\n"
+		return;
+    fi
+
+}
+
+function MediaUnlockTest_DMM(){
+    echo -n -e " DMM:\t\t\t\t\t->\c";
+    local tmpresult=$(curl -${1} --user-agent "${UA_Browser}" -s -X POST "https://api-p.videomarket.jp/v3/api/play/keyissue" -d 'fullStoryId=300G77001&playChromeCastFlag=false&loginFlag=0&playToken=04ee3e70e17e4a540505666cdd0a8301e656da53241447f83eb911a23355bd07&userId=undefined' -H "X-Authorization: S17mxcdRK3agC6UVIyDTdk7YFkQ29CzDwQrctjus")
+
+	if [ "$tmpresult" = "000" ]; then
+		echo -n -e "\r DMM:\t\t\t\t\t${Font_Red}Failed (Network Connection)${Font_Suffix}\n"
+		return;
+	fi	
+
+	local checkfailed=$(echo $tmpresult | grep 'Access is denied')
+    if [ -n "$checkfailed" ];then
+		echo -n -e "\r DMM:\t\t\t\t\t${Font_Red}No${Font_Suffix}\n"
+		return;
+	fi
+
+	local checksuccess=$(echo $tmpresult | grep 'PlayToken has failed')
+	if [ -n "$checksuccess" ];then
+		echo -n -e "\r DMM:\t\t\t\t\t${Font_Green}Yes${Font_Suffix}\n"
+		return;
+    else
+		echo -n -e "\r DMM:\t\t\t\t\t${Font_Red}No${Font_Suffix}\n"
+		return;
+    fi
+}
+
+function MediaUnlockTest_Tving(){
+    echo -n -e " Tving:\t\t\t\t\t->\c";
+    local tmpresult=$(curl -${1} --max-time 10 -s --user-agent "${UA_Browser}" "https://api.tving.com/v2a/media/stream/info?apiKey=1e7952d0917d6aab1f0293a063697610&info=Y&networkCode=CSND0900&osCode=CSOD0900&teleCode=CSCD0900&mediaCode=E003565993&screenCode=CSSD0100&noCache=1625447565&callingFrom=HTML5&adReq=adproxy&ooc=&uuid=4140415903-8a6df7d5&deviceInfo=PC" 2>&1)
+    if [[ "${result}" == "curl"* ]];then
+        echo -n -e "\r Tving:\t\t\t\t\t${Font_Red}Failed (Network Connection)${Font_Suffix}\n"
+        return;
+    fi
+    
+    local result=$(PharseJSON "${tmpresult}" "body.result.code")
+	if [[ "${result}" == "100" ]];then
+        echo -n -e "\r Tving:\t\t\t\t\t${Font_Green}Yes${Font_Suffix}\n"
+        return;
+	else
+		echo -n -e "\r Tving:\t\t\t\t\t${Font_Red}No${Font_Suffix}\n"
+		return;
+    fi
+}
+
+function MediaUnlockTest_KakaoTV(){
+    echo -n -e " KakaoTV:\t\t\t\t->\c";
+    local tmpresult=$(curl -${1} --max-time 10 -s --user-agent "${UA_Browser}" "https://tv.kakao.com/katz/v3/ft/cliplink/420380136/readyNplay?player=monet_html5&referer=https%3A%2F%2Ftv.kakao.com%2Fchannel%2F3815196%2Fcliplink%2F420380136&pageReferer=https%3A%2F%2Ftv.kakao.com%2Fchannel%2F3815196%2Fcliplink%2F420380136&uuid=&profile=HIGH&service=kakao_tv&section=channel&fields=seekUrl,abrVideoLocationList&playerVersion=3.10.25&appVersion=91.0.4472.114&startPosition=0&tid=&dteType=PC&continuousPlay=false&contentType=&drmType=widevine&1625448786881" 2>&1)
+    if [[ "${tmpresult}" == "curl"* ]];then
+        echo -n -e "\r KakaoTV:\t\t\t\t${Font_Red}Failed (Network Connection)${Font_Suffix}\n"
+        return;
+    fi
+
+    local result=$(jq -n -r "${tmpresult}" "code")
+	if [[ "${result}" == "GeoBlocked" ]];then
+		echo -n -e "\r KakaoTV:\t\t\t\t${Font_Red}No${Font_Suffix}\n"
+		return;
+	else
+        echo -n -e "\r KakaoTV:\t\t\t\t${Font_Green}Yes${Font_Suffix}\n"
+        return;
     fi
 }
 
@@ -1071,12 +1163,30 @@ function IPInfo() {
 function MediaUnlockTest() {
 	IPInfo ${1};
 	
+    hk ${1};
+
+    tw ${1};
+	
+    jp ${1};
+
+    kr ${1};
+	
+    us ${1};
+
+    eu ${1};
+	
+    global ${1};
+}
+
+function hk() {
 	echo -e "\n -- Hong Kong --"
 	MediaUnlockTest_MyTVSuper ${1};
 	MediaUnlockTest_NowE ${1};
 	MediaUnlockTest_ViuTV ${1};
 	MediaUnlockTest_BilibiliHKMCTW ${1};
+}
 
+function tw() {
     echo -e "\n -- Taiwan --"
 	MediaUnlockTest_4GTV ${1};
 	MediaUnlockTest_KKTV ${1};
@@ -1084,7 +1194,9 @@ function MediaUnlockTest() {
 	MediaUnlockTest_LineTV_TW ${1};
 	MediaUnlockTest_BahamutAnime ${1};
 	MediaUnlockTest_BilibiliTW ${1};
-	
+}
+
+function jp() {
 	echo -e "\n -- Japan --"
 	MediaUnlockTest_AbemaTV ${1};
 	MediaUnlockTest_Niconico ${1};
@@ -1092,11 +1204,21 @@ function MediaUnlockTest() {
 	MediaUnlockTest_unext ${1};
 	MediaUnlockTest_HuluJP ${1};
 	MediaUnlockTest_FOD ${1};
+    MediaUnlockTest_Radiko ${1};
+    MediaUnlockTest_DMM ${1};
 	GameTest_PCRJP ${1};
 	GameTest_UMAJP ${1};
 	GameTest_Kancolle ${1};
-	
-	echo -e "\n -- America --"
+}
+
+function kr() {
+    echo -e "\n -- Korea --"
+    MediaUnlockTest_Tving ${1};
+    MediaUnlockTest_KakaoTV ${1};
+}
+
+function us() {
+	echo -e "\n -- United States --"
 	MediaUnlockTest_HuluUS ${1};
 	MediaUnlockTest_HBONow ${1};
 	MediaUnlockTest_HBOMax ${1};
@@ -1106,14 +1228,22 @@ function MediaUnlockTest() {
 	MediaUnlockTest_PlutoTV ${1};
 	MediaUnlockTest_encoreTVB ${1};
 	MediaUnlockTest_ABC ${1};
+}
 
+function eu() {
     echo -e "\n -- Europe --"
 	MediaUnlockTest_BritBox ${1};
 	MediaUnlockTest_ITVHUB ${1};
 	MediaUnlockTest_Channel4 ${1};
 	MediaUnlockTest_BBCiPLAYER ${1};
 	MediaUnlockTest_Molotov ${1};
-	
+}
+
+function global() {
+    echo -e "\n -- Porn --"
+    MediaUnlockTest_Biguz ${1};
+    MediaUnlockTest_Blacked ${1};
+
 	echo -e "\n -- Global --"
 	MediaUnlockTest_DAZN ${1};
 	MediaUnlockTest_Netflix ${1};
@@ -1123,10 +1253,55 @@ function MediaUnlockTest() {
 	MediaUnlockTest_TikTok ${1};
 	MediaUnlockTest_iQiyi ${1};
 	MediaUnlockTest_Viu_com ${1};
-    MediaUnlockTest_Biguz ${1};
 	GameTest_Steam ${1};
 }
 
+function startcheck() {
+    mode=${1}
+    mode=$(echo ${mode} | tr 'A-Z' 'a-z')
+    if [[ "${mode}" != "" ]]; then
+        case $mode in
+            'hk')
+                IPInfo ${2};
+                hk ${2};
+                global ${2};
+            ;;
+            'tw')
+                IPInfo ${2};
+                tw ${2};
+                global ${2};
+            ;;
+            'jp')
+                IPInfo ${2};
+                jp ${2};
+                global ${2};
+            ;;
+            'kr')
+                IPInfo ${2};
+                kr ${2};
+                global ${2};
+            ;;
+            'us')
+                IPInfo ${2};
+                us ${2};
+                global ${2};
+            ;;
+            'eu')
+                IPInfo ${2};
+                eu ${2};
+                global ${2};
+            ;;
+            'global')
+                IPInfo ${2};
+                global ${2};
+            ;;
+            *)
+                MediaUnlockTest ${2};
+        esac
+    else
+        MediaUnlockTest ${2};
+    fi
+}
 
 # curl 包测试
 if ! curl -V > /dev/null 2>&1;then
@@ -1142,8 +1317,9 @@ echo "";
 echo "- IPV4 -";
 check4=$(ping 1.1.1.1 -c 1 2>&1);
 if [[ "$check4" != *"unreachable"* ]] && [[ "$check4" != *"Unreachable"* ]];then
-    MediaUnlockTest 4;
+    startcheck "${1}" "4";
 else
+    v4=""
     echo -e "${Font_SkyBlue}当前主机不支持IPv4,跳过...${Font_Suffix}";
 fi
 
@@ -1151,8 +1327,9 @@ echo ""
 echo "- IPV6 -";
 check6=$(ping6 240c::6666 -c 1 2>&1);
 if [[ "$check6" != *"unreachable"* ]] && [[ "$check6" != *"Unreachable"* ]];then
-    MediaUnlockTest 6;
+    v6="1"
 else
+    v6=""
     echo -e "${Font_SkyBlue}当前主机不支持IPv6,跳过...${Font_Suffix}";
 fi
 
