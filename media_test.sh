@@ -1,5 +1,5 @@
 #!/bin/bash
-shell_version="1.2.1";
+shell_version="1.2.2";
 UA_Browser="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.87 Safari/537.36";
 UA_Dalvik="Dalvik/2.1.0 (Linux; U; Android 9; ALP-AL00 Build/HUAWEIALP-AL00)";
 Disney_Auth="grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange&latitude=0&longitude=0&platform=browser&subject_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiNDAzMjU0NS0yYmE2LTRiZGMtOGFlOS04ZWI3YTY2NzBjMTIiLCJhdWQiOiJ1cm46YmFtdGVjaDpzZXJ2aWNlOnRva2VuIiwibmJmIjoxNjIyNjM3OTE2LCJpc3MiOiJ1cm46YmFtdGVjaDpzZXJ2aWNlOmRldmljZSIsImV4cCI6MjQ4NjYzNzkxNiwiaWF0IjoxNjIyNjM3OTE2LCJqdGkiOiI0ZDUzMTIxMS0zMDJmLTQyNDctOWQ0ZC1lNDQ3MTFmMzNlZjkifQ.g-QUcXNzMJ8DwC9JqZbbkYUSKkB1p4JGW77OON5IwNUcTGTNRLyVIiR8mO6HFyShovsR38HRQGVa51b15iAmXg&subject_token_type=urn%3Abamtech%3Aparams%3Aoauth%3Atoken-type%3Adevice"
@@ -302,7 +302,7 @@ function GameTest_PCRJP() {
 function GameTest_UMAJP() {
     echo -n -e " Pretty Derby Japan:\t\t\t->\c";
     # 测试，连续请求两次 (单独请求一次可能会返回35, 第二次开始变成0)
-    local result=$(curl --user-agent "${UA_Dalvik}" -${1} -fsL --write-out %{http_code} --output /dev/null --max-time 10 https://api-umamusume.cygames.jp/);
+    local result=$(curl --user-agent "${UA_Dalvik}" -${1} -fsL --write-out %{http_code} --output /dev/null --max-time 3 https://api-umamusume.cygames.jp/);
     if [ "$result" = "000" ]; then
         echo -n -e "\r Pretty Derby Japan:\t\t\t${Font_Red}Failed (Network Connection)${Font_Suffix}\n"
     elif [ "$result" = "404" ]; then
@@ -1014,12 +1014,8 @@ function MediaUnlockTest_Blacked(){
         return;
     fi
 
-    local ip=$(curl -fsSL http://api-ipv${1}.ip.sb 2>&1);
-	local ipresult=$(curl -fsSL http://ip-api.com/json/${ip} 2>&1);
-    local country=$(PharseJSON "${ipresult}" "countryCode");
-    
-	if [[ "${country}" != "CN" ]];then
-        echo -n -e "\r Blacked:\t\t\t\t${Font_Green}Yes(Region: ${country})${Font_Suffix}\n"
+    if [[ "${country}" != "CN" ]];then
+        echo -n -e "\r Blacked:\t\t\t\t${Font_Green}Yes${Font_Suffix}\n"
         return;
 	else
 		echo -n -e "\r Blacked:\t\t\t\t${Font_Red}No${Font_Suffix}\n"
@@ -1132,6 +1128,18 @@ function MediaUnlockTest_KakaoTV(){
     fi
 }
 
+function GameTest_ErogameScape(){
+    echo -n -e " ErogameScape:\t\t\t\t->\c";
+    local result=$(curl -${1} --max-time 3 --user-agent "${UA_Browser}" "https://erogamescape.dyndns.org/" 2>&1)
+    if [[ "${tmpresult}" == "curl"* ]];then
+        echo -n -e "\r ErogameScape:\t\t\t\t${Font_Red}No${Font_Suffix}\n"
+        return;
+    else
+        echo -n -e "\r ErogameScape:\t\t\t\t${Font_Green}Yes${Font_Suffix}\n"
+        return;
+    fi
+}
+
 function IPInfo() {
     local result=$(curl -fsSL http://ip-api.com/json/ 2>&1);
 	
@@ -1209,6 +1217,7 @@ function jp() {
 	GameTest_PCRJP ${1};
 	GameTest_UMAJP ${1};
 	GameTest_Kancolle ${1};
+    GameTest_ErogameScape ${1};
 }
 
 function kr() {
