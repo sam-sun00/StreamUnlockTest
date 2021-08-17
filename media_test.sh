@@ -728,7 +728,7 @@ function MediaUnlockTest_encoreTVB() {
         return;
     fi
 
-    if ! PharseJSON "$tmpresult" "error_subcode" > /dev/nul 2>&1; then
+    if ! PharseJSON "$tmpresult" "error_subcode" > /dev/null 2>&1; then
 		echo -n -e "\r encoreTVB:\t\t\t\t${Font_Red}No${Font_Suffix}\n"
 		return;
     fi
