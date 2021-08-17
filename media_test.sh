@@ -190,7 +190,11 @@ function MediaUnlockTest_BahamutAnime() {
 # 流媒体解锁测试-哔哩哔哩大陆限定
 function MediaUnlockTest_BilibiliChinaMainland() {
     echo -n -e " BiliBili China Mainland Only:\t\t->\c";
-    local randsession="$(cat /dev/urandom | head -n 32 | md5sum | head -c 32)";
+    if ["$(uname)"="Darwin"];then
+        local randsession="$(cat /dev/urandom | head -n 32 | md5 | head -c 32)";
+    else
+        local randsession="$(cat /dev/urandom | head -n 32 | md5sum | head -c 32)";
+    fi
     # 尝试获取成功的结果
     local result=$(curl --user-agent "${UA_Browser}" -${1} -fsSL --max-time 10 "https://api.bilibili.com/pgc/player/web/playurl?avid=82846771&qn=0&type=&otype=json&ep_id=307247&fourk=1&fnver=0&fnval=16&session=${randsession}&module=bangumi" 2>&1);
     if [[ "$result" != "curl"* ]]; then
@@ -214,7 +218,11 @@ function MediaUnlockTest_BilibiliChinaMainland() {
 # 流媒体解锁测试-哔哩哔哩港澳台限定
 function MediaUnlockTest_BilibiliHKMCTW() {
     echo -n -e " BiliBili Hongkong/Macau/Taiwan:\t->\c";
-    local randsession="$(cat /dev/urandom | head -n 32 | md5sum | head -c 32)";
+    if ["$(uname)"="Darwin"];then
+        local randsession="$(cat /dev/urandom | head -n 32 | md5 | head -c 32)";
+    else
+        local randsession="$(cat /dev/urandom | head -n 32 | md5sum | head -c 32)";
+    fi
     # 尝试获取成功的结果
     local result=$(curl --user-agent "${UA_Browser}" -${1} -fsSL --max-time 10 "https://api.bilibili.com/pgc/player/web/playurl?avid=18281381&cid=29892777&qn=0&type=&otype=json&ep_id=183799&fourk=1&fnver=0&fnval=16&session=${randsession}&module=bangumi" 2>&1);
     if [[ "$result" != "curl"* ]]; then
@@ -238,7 +246,11 @@ function MediaUnlockTest_BilibiliHKMCTW() {
 # 流媒体解锁测试-哔哩哔哩台湾限定
 function MediaUnlockTest_BilibiliTW() {
     echo -n -e " Bilibili Taiwan Only:\t\t\t->\c";
-    local randsession="$(cat /dev/urandom | head -n 32 | md5sum | head -c 32)";
+    if ["$(uname)"="Darwin"];then
+        local randsession="$(cat /dev/urandom | head -n 32 | md5 | head -c 32)";
+    else
+        local randsession="$(cat /dev/urandom | head -n 32 | md5sum | head -c 32)";
+    fi
     # 尝试获取成功的结果
     local result=$(curl --user-agent "${UA_Browser}" -${1} -fsSL --max-time 10 "https://api.bilibili.com/pgc/player/web/playurl?avid=50762638&cid=100279344&qn=0&type=&otype=json&ep_id=268176&fourk=1&fnver=0&fnval=16&session=${randsession}&module=bangumi" 2>&1);
     if [[ "$result" != "curl"* ]]; then
