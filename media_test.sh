@@ -145,7 +145,7 @@ function MediaUnlockTest_HBOMax() {
     local result=$(curl --user-agent "${UA_Browser}" -${1} -fsSL --max-time 10 "https://www.hbomax.com" 2>&1);
     if [[ "$result" != "curl"* ]]; then
         # 下载页面成功，开始解析跳转
-        if [[ "${result}" == *"Not in service area"* ]]; then
+        if [[ "${result}" != *"Not in service area"* ]]; then
             echo -n -e "\r HBO Max:\t\t\t\t${Font_Green}Yes${Font_Suffix}\n";
         else
             echo -n -e "\r HBO Max:\t\t\t\t${Font_Red}No${Font_Suffix}\n";
