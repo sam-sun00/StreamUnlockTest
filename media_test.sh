@@ -190,7 +190,7 @@ function MediaUnlockTest_BahamutAnime() {
 # 流媒体解锁测试-哔哩哔哩大陆限定
 function MediaUnlockTest_BilibiliChinaMainland() {
     echo -n -e " BiliBili China Mainland Only:\t\t->\c";
-    if ["$(uname)"="Darwin"];then
+    if ["$(uname)"=="Darwin"];then
         local randsession="$(cat /dev/urandom | head -n 32 | md5 | head -c 32)";
     else
         local randsession="$(cat /dev/urandom | head -n 32 | md5sum | head -c 32)";
@@ -218,7 +218,7 @@ function MediaUnlockTest_BilibiliChinaMainland() {
 # 流媒体解锁测试-哔哩哔哩港澳台限定
 function MediaUnlockTest_BilibiliHKMCTW() {
     echo -n -e " BiliBili Hongkong/Macau/Taiwan:\t->\c";
-    if ["$(uname)"="Darwin"];then
+    if ["$(uname)"=="Darwin"];then
         local randsession="$(cat /dev/urandom | head -n 32 | md5 | head -c 32)";
     else
         local randsession="$(cat /dev/urandom | head -n 32 | md5sum | head -c 32)";
@@ -246,7 +246,7 @@ function MediaUnlockTest_BilibiliHKMCTW() {
 # 流媒体解锁测试-哔哩哔哩台湾限定
 function MediaUnlockTest_BilibiliTW() {
     echo -n -e " Bilibili Taiwan Only:\t\t\t->\c";
-    if ["$(uname)"="Darwin"];then
+    if ["$(uname)"=="Darwin"];then
         local randsession="$(cat /dev/urandom | head -n 32 | md5 | head -c 32)";
     else
         local randsession="$(cat /dev/urandom | head -n 32 | md5sum | head -c 32)";
